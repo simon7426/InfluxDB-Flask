@@ -1,0 +1,7 @@
+[run]
+omit = tests/*
+branch = False
+[report]
+fail_under = 100
+precision = 2
+skip_covered = True

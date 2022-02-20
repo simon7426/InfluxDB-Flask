@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "InfluxDB-Flask"
+version = "0.1.0"
+description = "InfluxDB-Flask adds influxdb-client-python support to Flask."
+authors = ["simon.islam <mail@simonislam.com>"]
+license = "BSD-3-Clause"
+readme = "README.md"
+keywords = [
+    "Flask",
+    "InfluxDB",
+]
+include = [
+    "LICENSE",
+    "tests/",
+]
+repository = "https://github.com/simon7426/InfluxDB-Flask"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Flask = "^2.0.3"
+influxdb-client = "^1.25.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "7.0.1"
+pytest-cov = "^3.0.0"
+black = "^22.1.0"
+isort = "^5.10.1"
+flake8 = "^4.0.1"
+bandit = "^1.7.2"
+safety = "^1.10.3"
+Sphinx = "4.3.2"
+Pallets-Sphinx-Themes = "^2.0.2"
+poetry2setup = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.urls]
+issues = "https://github.com/simon7426/InfluxDB-Flask/issues"
