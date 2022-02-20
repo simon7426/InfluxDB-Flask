@@ -9,11 +9,11 @@ from flask import Flask, _app_ctx_stack
 from flask.globals import _app_ctx_err_msg
 
 from influxdb_flask import __version__
-from influxdb_flask.influxdb_flask import InfluxDB, _no_influx_msg, _org_or_token_not_set_msg
+from influxdb_flask.influxdb_flask import InfluxDB, _no_influx_msg
 
 
 def test_version():
-    assert __version__ == "0.1.0"
+    assert __version__ == "0.1.1"
 
 
 class TestBase:
