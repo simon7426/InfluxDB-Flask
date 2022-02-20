@@ -58,7 +58,7 @@ html_theme = "flask"
 html_theme_options = {"index_sidebar_logo": False}
 html_context = {
     "project_links": [
-        ProjectLink("PyPI Releases", "https://pypi.org"),
+        ProjectLink("PyPI Releases", "https://pypi.org/project/influxdb-flask/"),
         ProjectLink("Source Code", "https://github.com/simon7426/InfluxDB-Flask"),
         ProjectLink("Issue Tracker", "https://github.com/simon7426/InfluxDB-Flask/issues/")
     ]
