@@ -1,7 +1,7 @@
 
 # InfluxDB-Flask
 
-
+Documentation: [InfluxDB-Flask Documentation](https://influxdb-flask.readthedocs.io/en/latest/)
 ## Introduction
 
 InfluxDB went for a massive change from v1.7 to v2.0. They introduced a
