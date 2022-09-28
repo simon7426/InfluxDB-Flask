@@ -1,10 +1,17 @@
 import influxdb_client
 from flask import Flask, _app_ctx_stack, current_app
-from flask.globals import _app_ctx_err_msg
 
 _no_influx_msg = """\
 InfluxDB connection is not present.
 This means that something has overwritten _app_ctx_stack.top.influxdb.
+"""
+
+_no_app_msg = """\
+Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.\
 """
 
 
@@ -70,7 +77,7 @@ class InfluxDB(object):
         """
         ctx = _app_ctx_stack.top
         if ctx is None:
-            raise RuntimeError(_app_ctx_err_msg)
+            raise RuntimeError(_no_app_msg)
         if not hasattr(ctx, "influxdb"):
             ctx.influxdb = self.connect()
         if ctx.influxdb is None:
