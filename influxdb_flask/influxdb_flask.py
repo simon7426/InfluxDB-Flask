@@ -1,10 +1,9 @@
 import influxdb_client
-from flask import Flask, _app_ctx_stack, current_app
-from flask.globals import _app_ctx_err_msg
+from flask import Flask, current_app, g
 
 _no_influx_msg = """\
 InfluxDB connection is not present.
-This means that something has overwritten _app_ctx_stack.top.influxdb.
+This means that something has overwritten g.influxdb.
 """
 
 
@@ -39,9 +38,8 @@ class InfluxDB(object):
         """
         Method for tearing down influxdb input
         """
-        ctx = _app_ctx_stack.top
-        if hasattr(ctx, "influxdb") and ctx.influxdb is not None:
-            ctx.influxdb.close()
+        if hasattr(g, "influxdb") and g.influxdb is not None:
+            g.influxdb.close()
 
     @staticmethod
     def connect() -> influxdb_client.InfluxDBClient:
@@ -68,15 +66,12 @@ class InfluxDB(object):
         InfluxDBClient object
         :return:
         """
-        ctx = _app_ctx_stack.top
-        if ctx is None:
-            raise RuntimeError(_app_ctx_err_msg)
-        if not hasattr(ctx, "influxdb"):
-            ctx.influxdb = self.connect()
-        if ctx.influxdb is None:
+        if not hasattr(g, "influxdb"):
+            g.influxdb = self.connect()
+        if g.influxdb is None:
             raise RuntimeError(_no_influx_msg)
 
-        return ctx.influxdb
+        return g.influxdb
 
     @property
     def close(self) -> callable:

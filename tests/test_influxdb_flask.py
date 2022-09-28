@@ -1,19 +1,25 @@
-from datetime import datetime
-import types
 import os
+from datetime import datetime
 
 import influxdb_client
-from influxdb_client.client.write_api import SYNCHRONOUS
 import pytest
-from flask import Flask, _app_ctx_stack
-from flask.globals import _app_ctx_err_msg
+from flask import Flask, g
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 from influxdb_flask import __version__
 from influxdb_flask.influxdb_flask import InfluxDB, _no_influx_msg
 
+_no_app_msg = """\
+Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.\
+"""
+
 
 def test_version():
-    assert __version__ == "0.1.1"
+    assert __version__ == "0.1.2"
 
 
 class TestBase:
@@ -21,14 +27,13 @@ class TestBase:
         with pytest.raises(RuntimeError) as excinfo:
             influx.query_api().query('from(bucket:"test") |> range(start: -10m)')
 
-        assert str(excinfo.value) == _app_ctx_err_msg
+        assert str(excinfo.value) == _no_app_msg
 
     def test_overwrite_influxdb(self, app_no_cleanup, influx):
         app = app_no_cleanup
 
-        with app.ctx as ctx, pytest.raises(RuntimeError) as excinfo:
-            ctx = _app_ctx_stack.top
-            ctx.influxdb = None
+        with app.ctx, pytest.raises(RuntimeError) as excinfo:
+            g.influxdb = None
             influx.query_api().query('from(bucket:"test") |> range(start: -10m)')
 
         assert str(excinfo.value) == _no_influx_msg
@@ -37,10 +42,9 @@ class TestBase:
         with app.ctx:
             influx.query_api().query('from(bucket:"test") |> range(start: -10m)')
 
-            ctx = _app_ctx_stack.top
-            flux = ctx.influxdb
+            flux = g.influxdb
         assert isinstance(flux, influxdb_client.InfluxDBClient)
-    
+
     def test_app_non_factory_pattern(self):
         app = Flask(__name__)
         influx = InfluxDB(app)
@@ -89,14 +93,18 @@ class TestTags:
                 "tags": {"info": "test2"},
                 "measurement": measurement,
                 "time": datetime.utcnow(),
-            }
+            },
         ]
 
         with app.ctx:
             influx.write_api(SYNCHRONOUS).write("test", "test", points[0])
             influx.write_api(SYNCHRONOUS).write("test", "test", points[1])
             result = influx.query_api().query(
-                'from(bucket: "test") |> range(start: -10m) |> filter(fn: (r) => r["info"] == "test1" or r["info"] == "test2") |> aggregateWindow(every: 1m, fn: last, createEmpty: false) |> yield(name: "last")'
+                (
+                    'from(bucket: "test") |> range(start: -10m) |> filter(fn: (r) => r["info"] == "test1" or'
+                    ' r["info"] == "test2") |> aggregateWindow(every: 1m, fn: last, createEmpty: false) |> '
+                    'yield(name: "last")'
+                )
             )
         assert isinstance(result, list)
 
@@ -119,18 +127,23 @@ class TestTags:
                 "tags": {"info": "test2"},
                 "measurement": measurement,
                 "time": datetime.utcnow(),
-            }
+            },
         ]
 
         with app.ctx:
             influx.write_api(SYNCHRONOUS).write("test", "test", points[0])
             influx.write_api(SYNCHRONOUS).write("test", "test", points[1])
             result = influx.query_api().query(
-                'from(bucket: "test") |> range(start: -10m) |> filter(fn: (r) => r["_measurement"] == "test_tags") |> aggregateWindow(every: 1m, fn: last, createEmpty: false) |> yield(name: "last")'
+                (
+                    'from(bucket: "test") |> range(start: -10m) |> '
+                    'filter(fn: (r) => r["_measurement"] == "test_tags") |> '
+                    'aggregateWindow(every: 1m, fn: last, createEmpty: false) |> yield(name: "last")'
+                )
             )
         assert isinstance(result, list)
         assert "info" in result[0].records[0].values
         assert "info" in result[1].records[0].values
+
 
 class TestApp:
     def test_response(self, app, influx):
@@ -139,7 +152,11 @@ class TestApp:
 
         with app.ctx:
             result = influx.query_api().query(
-                'from(bucket: "test") |> range(start: -10m) |> filter(fn: (r) => r["_measurement"] == "temperature") |> aggregateWindow(every: 1m, fn: last, createEmpty: false) |> yield(name: "last")'
+                (
+                    'from(bucket: "test") |> range(start: -10m) |> '
+                    'filter(fn: (r) => r["_measurement"] == "temperature")'
+                    ' |> aggregateWindow(every: 1m, fn: last, createEmpty: false) |> yield(name: "last")'
+                )
             )
         assert len(result) == 1
         assert result[0].records[0].values["location"] == "dhaka"

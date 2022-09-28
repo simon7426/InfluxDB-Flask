@@ -1,13 +1,12 @@
-from http import client
 import os
 from collections import namedtuple
 from datetime import datetime
 
 import pytest
 from flask import Flask, jsonify
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 from influxdb_flask import InfluxDB
-from influxdb_client.client.write_api import SYNCHRONOUS
 
 App = namedtuple("App", ["ctx", "client"])
 
@@ -54,7 +53,6 @@ def app(request):
     ctx = app.app_context()
 
     yield App(ctx, client)
-
 
 
 @pytest.fixture()

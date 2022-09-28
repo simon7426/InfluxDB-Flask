@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "InfluxDB-Flask"
-version = "0.1.1"
+version = "0.1.2"
 description = "InfluxDB-Flask adds influxdb-client-python support to Flask."
 authors = ["simon.islam <mail@simonislam.com>"]
 license = "BSD-3-Clause"
