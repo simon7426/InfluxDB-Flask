@@ -3,15 +3,23 @@ from datetime import datetime
 
 import influxdb_client
 import pytest
-from flask import Flask, _app_ctx_stack
+from flask import Flask, g
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from influxdb_flask import __version__
-from influxdb_flask.influxdb_flask import InfluxDB, _no_app_msg, _no_influx_msg
+from influxdb_flask.influxdb_flask import InfluxDB, _no_influx_msg
+
+_no_app_msg = """\
+Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.\
+"""
 
 
 def test_version():
-    assert __version__ == "0.1.1"
+    assert __version__ == "0.1.2"
 
 
 class TestBase:
@@ -24,9 +32,8 @@ class TestBase:
     def test_overwrite_influxdb(self, app_no_cleanup, influx):
         app = app_no_cleanup
 
-        with app.ctx as ctx, pytest.raises(RuntimeError) as excinfo:
-            ctx = _app_ctx_stack.top
-            ctx.influxdb = None
+        with app.ctx, pytest.raises(RuntimeError) as excinfo:
+            g.influxdb = None
             influx.query_api().query('from(bucket:"test") |> range(start: -10m)')
 
         assert str(excinfo.value) == _no_influx_msg
@@ -35,8 +42,7 @@ class TestBase:
         with app.ctx:
             influx.query_api().query('from(bucket:"test") |> range(start: -10m)')
 
-            ctx = _app_ctx_stack.top
-            flux = ctx.influxdb
+            flux = g.influxdb
         assert isinstance(flux, influxdb_client.InfluxDBClient)
 
     def test_app_non_factory_pattern(self):
