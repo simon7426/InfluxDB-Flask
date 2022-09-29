@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>InfluxDB-Flask &#8212; InfluxDB-Flask 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/flask.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">InfluxDB-Flask 0.1.2 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">InfluxDB-Flask</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-influxdb_flask">
+<span id="influxdb-flask"></span><h1>InfluxDB-Flask<a class="headerlink" href="#module-influxdb_flask" title="Permalink to this headline">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>InfluxDB went for a massive change from v1.7 to v2.0. They introduced a new client library <a class="reference external" href="https://github.com/influxdata/influxdb-client-python">influxdb-client-python</a> to interact with the InfluxDB v2 API. InfluxDB-Flask adds influxdb-client-python support to Flask.</p>
+<p><strong>Note: Use this library with InfluxDB 2.x and InfluxDB 1.8+.</strong> For connecting to <strong>InfluxDB 1.7</strong> or earlier instances, use the <a class="reference external" href="https://github.com/btashton/flask-influxdb">Flask-InfluxDB</a> that uses <a class="reference external" href="https://github.com/influxdata/influxdb-python">InfluxDB-Python</a> as client library.</p>
+<p>The API of the <strong>influxdb-client-python</strong> is not the backwards-compatible with the old one - <strong>influxdb-python.</strong></p>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Install the extension via pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install influxdb-flask
+</pre></div>
+</div>
+</section>
+<section id="set-up">
+<h2>Set Up<a class="headerlink" href="#set-up" title="Permalink to this headline">¶</a></h2>
+<p>Influxdb_client can be accessed via InfluxDB class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">from</span> <span class="nn">influxdb_flask</span> <span class="kn">import</span> <span class="n">InfluxDB</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">influxdb</span> <span class="o">=</span> <span class="n">InfluxDB</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Delayed configuration of <code class="docutils literal notranslate"><span class="pre">InfluxDB</span></code> is also supported via <strong>init_app</strong> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">influxdb</span> <span class="o">=</span> <span class="n">InfluxDB</span><span class="p">()</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">influxdb</span><span class="o">.</span><span class="n">init_app</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Currently <code class="docutils literal notranslate"><span class="pre">InfluxDB.connection</span></code> instance provides the functionality of <code class="docutils literal notranslate"><span class="pre">InfluxDBClient</span></code> .</p>
+<p>An included example shows how to write and query data from InfluxDB.</p>
+</section>
+<section id="configuring-influxdb-flask">
+<h2>Configuring InfluxDB-Flask<a class="headerlink" href="#configuring-influxdb-flask" title="Permalink to this headline">¶</a></h2>
+<p>The following configuration values can be set for InfluxDB-Flask extension:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 83%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_URL</span></code></p></td>
+<td><p>InfluxDB server API url. Default is <a class="reference external" href="http://localhost:8086">http://localhost:8086</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_ORG</span></code></p></td>
+<td><p>Organization name (used as a default in query and write API). Default is None</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_TOKEN</span></code></p></td>
+<td><p>Authentication token</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_TIMEOUT</span></code></p></td>
+<td><p>HTTP client timeout setting for a request specified in milliseconds. Default is 10s.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_VERIFY_SSL</span></code></p></td>
+<td><p>Set this to false to skip verifying SSL certificate when calling API from https server. Default is False</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_SSL_CA_CERT</span></code></p></td>
+<td><p>Set this to customize the certificate file to verify the peer. Default is None.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_CONNECTION_POOL_MAXSIZE</span></code></p></td>
+<td><p>Number of connections to save that can be reused by urllib3. Default is 10.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">INFLUXDB_V2_AUTH_BASIC</span></code></p></td>
+<td><p>Set this to true to enable basic authentication when talking to a InfluxDB 1.8.x that does not use auth-enabled but is protected by a reverse proxy with basic authentication. Default is False.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+  <span id="sidebar-top"></span>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  
+
+  <h3>Project Links</h3>
+  <ul>
+    <li><a href="https://pypi.org/project/influxdb-flask/">PyPI Releases</a>
+  
+    <li><a href="https://github.com/simon7426/InfluxDB-Flask">Source Code</a>
+  
+    <li><a href="https://github.com/simon7426/InfluxDB-Flask/issues/">Issue Tracker</a>
+  </ul>
+  <h3>Contents</h3>
+  <ul>
+<li><a class="reference internal" href="#">InfluxDB-Flask</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#set-up">Set Up</a></li>
+<li><a class="reference internal" href="#configuring-influxdb-flask">Configuring InfluxDB-Flask</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script><div id="ethical-ad-placement"></div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Simon Islam.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
+    </div>
+  <script src="_static/version_warning_offset.js"></script>
+
+  </body>
+</html>
